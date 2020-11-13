@@ -39,8 +39,8 @@ router.post("/offer/publish", isAuthenticated, async (req, res) => {
 
     // Envoyer plusieurs images sur Cloudinary
     const fileKeys = Object.keys(req.files);
-    // console.log("req.files : ", req.files); // { [ {}, {}, {} ] }   //   { {}, {} }
-    // console.log("fileKeys : ", fileKeys); // [ 'picture', ]   //   [ 'picture', 'picture2']
+    // console.log("req.files : ", req.files); // { picture: File{}, picture2: File{} }
+    // console.log("fileKeys : ", fileKeys); // [ 'picture', 'picture2']
     let results = {};
 
     if (fileKeys.length === 0) {
@@ -48,32 +48,30 @@ router.post("/offer/publish", isAuthenticated, async (req, res) => {
     }
 
     fileKeys.forEach(async (fileKey) => {
+      // ['picture'] => [i]
       try {
-        const file = req.files[fileKey]; // File{...}
+        const file = req.files[fileKey]; // [picture: File{...}]
         const result = await cloudinary.uploader.upload(file.path, {
           folder: `vinted/offers/${newOffer.id}`,
         });
+        // console.log("RESULT:", result);
         results[fileKey] = {
           success: true,
           result: result,
         };
+        console.log("RESULTS:", results);
 
-        if (Object.keys(results) === fileKeys.length) {
-          newOffer.product_image = results; // MARCHE PAS : Rajouter en BDD les infos images
-          return res.status(200).json(results);
+        if (Object.keys(results).length === fileKeys.length) {
+          newOffer.product_image = results;
+
+          // Save
+          await newOffer.save();
+          res.status(200).json(newOffer);
         }
       } catch (error) {
         res.status(400).json({ message: error.message });
       }
     });
-
-    //newOffer.product_image = results;  // results {} car executé avant forEach
-    //console.log(results);
-
-    // Save
-    await newOffer.save();
-
-    res.status(200).json(newOffer); //newOffer
   } catch (error) {
     res.status(400).json({ message: error.message });
   }

@@ -6,7 +6,7 @@ const mongoose = require("mongoose");
 const cloudinary = require("cloudinary").v2;
 
 const app = express();
-app.use(formidable()); // req.files to be arrays of files { multiples: true }
+app.use(formidable({ multiples: true }));
 app.use(cors());
 
 //MongoDB Connect

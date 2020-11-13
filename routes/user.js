@@ -4,6 +4,8 @@ const router = express.Router();
 const SHA256 = require("crypto-js/sha256");
 const encBase64 = require("crypto-js/enc-base64");
 const uid2 = require("uid2");
+//
+const cloudinary = require("cloudinary").v2;
 
 // Import des models
 const User = require("../models/User");
@@ -13,7 +15,6 @@ const User = require("../models/User");
 router.post("/user/signup", async (req, res) => {
   try {
     const { email, username, phone, password } = req.fields;
-
     // 1. Interroger BDD email existe déjà ?
     const emailExists = await User.findOne({ email: email });
 
@@ -31,8 +32,8 @@ router.post("/user/signup", async (req, res) => {
         const token = uid2(64);
 
         // Upload photo avatar
-        const pictureToUpload = req.files.picture.path;
-        const infoPicture = await cloudinary.uploader.upload(pictureToUpload);
+        // const pictureToUpload = req.files.picture.path;
+        // const infoPicture = await cloudinary.uploader.upload(pictureToUpload);
 
         // 3. Créer nouvel user
         const newUser = new User({
@@ -40,7 +41,7 @@ router.post("/user/signup", async (req, res) => {
           account: {
             username: username,
             phone: phone,
-            avatar: infoPicture.secure_url,
+            // avatar: infoPicture.secure_url,
           },
           token: token,
           hash: hash,
@@ -55,7 +56,7 @@ router.post("/user/signup", async (req, res) => {
           email: newUser.email,
           account: newUser.account,
           token: newUser.token,
-          avatar: newUser.avatar,
+          // avatar: newUser.avatar,
         });
       } else {
         res.status(400).json({
