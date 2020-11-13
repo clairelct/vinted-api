@@ -86,70 +86,57 @@ router.get("/offers", async (req, res) => {
     const tabQueries = Object.keys(req.query); // ['page']
     const filters = {};
 
-    // A) SI IL Y A DES QUERIES
-    if (tabQueries.length !== 0) {
-      // Traitement de tri par clés : Rajouter dans filters{} les queries présentes
-      if (title) {
-        filters.product_name = new RegExp(title, "i"); // 'pantalon' ou 'Pantalon'
-      }
-      if (priceMin) {
-        filters.product_price = { $gte: priceMin };
-      }
-      if (priceMax) {
-        if (filters.product_price) {
-          filters.product_price.$lte = priceMax; // product.price = {$lte: priceMax} ??
-        } else {
-          filters.product_price = { $lte: priceMax };
-        }
-      }
-
-      // Traitement par ordre de prix
-      let sort = {};
-
-      if (req.query.sort) {
-        if (req.query.sort === "price-desc") {
-          sort = { product_price: -1 };
-        } else if (req.query.sort === "price-asc") {
-          sort = { product_price: 1 };
-        }
-      }
-
-      // Affichage
-      let page;
-      let limit = Number(req.query.limit);
-
-      // Définir numéro de la page :
-      if (Number(req.query.page) < 1) {
-        page = 1;
-      } else {
-        page = Number(req.query.page);
-      }
-
-      // PREPARATION Response
-      const offers = await Offer.find(filters)
-        .select("product_name product_price product_description")
-        .sort(sort)
-        .skip((page - 1) * limit) // Si page 2 => (2-1) * 3 = skip : 3
-        .limit(limit);
-
-      // cette ligne va nous retourner le nombre d'annonces trouvées en fonction des filtres
-      const count = await Offer.countDocuments(filters);
-
-      res.status(200).json({
-        count: count,
-        offers: offers,
-      });
-    } else {
-      // B) SI PAS DE QUERIES RENSEIGNÉES, afficher juste les X dernières offres
-      const offers = await Offer.find().select(
-        "product_name product_price product_description"
-      );
-      // res.status(200).json(offers);
-      res.status(200).json({
-        count: count,
-        offers: offers,
-      });
+    // Traitement de tri par clés : Rajouter dans filters{} les queries présentes
+    if (title) {
+      filters.product_name = new RegExp(title, "i"); // 'pantalon' ou 'Pantalon'
     }
+    if (priceMin) {
+      filters.product_price = { $gte: priceMin };
+    }
+    if (priceMax) {
+      if (filters.product_price) {
+        filters.product_price.$lte = priceMax; // product.price = {$lte: priceMax} ??
+      } else {
+        filters.product_price = { $lte: priceMax };
+      }
+    }
+
+    // Traitement par ordre de prix
+    let sort = {};
+
+    if (req.query.sort) {
+      if (req.query.sort === "price-desc") {
+        sort = { product_price: -1 };
+      } else if (req.query.sort === "price-asc") {
+        sort = { product_price: 1 };
+      }
+    }
+
+    // Affichage
+    let page;
+    let limit = Number(req.query.limit);
+
+    // Définir numéro de la page :
+    if (Number(req.query.page) < 1) {
+      page = 1;
+    } else {
+      page = Number(req.query.page);
+    }
+
+    // PREPARATION Response
+    const offers = await Offer.find(filters)
+      .select("product_name product_price product_description")
+      .sort(sort)
+      .skip((page - 1) * limit) // Si page 2 => (2-1) * 3 = skip : 3
+      .limit(limit);
+
+    // cette ligne va nous retourner le nombre d'annonces trouvées en fonction des filtres
+    const count = await Offer.countDocuments(filters);
+
+    res.status(200).json({
+      count: count,
+      offers: offers,
+    });
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
