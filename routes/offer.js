@@ -144,7 +144,11 @@ router.get("/offers", async (req, res) => {
       const offers = await Offer.find().select(
         "product_name product_price product_description"
       );
-      res.status(200).json(offers);
+      // res.status(200).json(offers);
+      res.status(200).json({
+        count: count,
+        offers: offers,
+      });
     }
   } catch (error) {
     res.status(400).json({ message: error.message });
