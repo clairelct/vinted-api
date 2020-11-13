@@ -125,7 +125,10 @@ router.get("/offers", async (req, res) => {
 
     // PREPARATION Response
     const offers = await Offer.find(filters)
-      .select("product_name product_price product_description")
+      .populate({
+        path: "owner",
+        select: "account",
+      })
       .sort(sort)
       .skip((page - 1) * limit) // Si page 2 => (2-1) * 3 = skip : 3
       .limit(limit);
