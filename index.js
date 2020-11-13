@@ -23,6 +23,10 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
+app.get("/", (req, res) => {
+  res.status(200).json({ message: "Welcome on Claire's Vinted API !" });
+});
+
 // Import des routes
 const userRoutes = require("./routes/user");
 app.use(userRoutes);
