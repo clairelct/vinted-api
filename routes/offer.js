@@ -59,13 +59,14 @@ router.post("/offer/publish", isAuthenticated, async (req, res) => {
           success: true,
           result: result,
         };
-        console.log("RESULTS:", results);
+        // console.log("RESULTS:", results);
 
         if (Object.keys(results).length === fileKeys.length) {
           newOffer.product_image = results;
 
           // Save
           await newOffer.save();
+          console.log("NEW OFFER", newOffer);
           res.status(200).json(newOffer);
         }
       } catch (error) {
@@ -127,7 +128,7 @@ router.get("/offers", async (req, res) => {
     const offers = await Offer.find(filters)
       .populate({
         path: "owner",
-        select: "account account.phone account.avatar",
+        select: "account",
       })
       .sort(sort)
       .skip((page - 1) * limit) // Si page 2 => (2-1) * 3 = skip : 3

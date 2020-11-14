@@ -56,7 +56,6 @@ router.post("/user/signup", async (req, res) => {
           email: newUser.email,
           account: newUser.account,
           token: newUser.token,
-          avatar: newUser.avatar,
         });
       } else {
         res.status(400).json({
