@@ -37,63 +37,21 @@ router.post("/offer/publish", isAuthenticated, async (req, res) => {
       owner: req.user, // La référence vers l'utilisateur : enregistrée dans middleware
     });
 
-    // // Envoyer plusieurs images sur Cloudinary
-    // const fileKeys = Object.keys(req.files);
-    // // console.log("req.files : ", req.files); // { picture: File{}, picture2: File{} }
-    // // console.log("fileKeys : ", fileKeys); // [ 'picture', 'picture2']
-
-    // let results = {};
-
-    // if (fileKeys.length === 0) {
-    //   res.status(400).json({ message: "No file uploaded!" });
-    // }
-
-    // fileKeys.forEach(async (fileKey) => {
-    //   // ['picture'] => [i]
-    //   try {
-    //     const file = req.files[fileKey]; // [picture: File{...}]
-    //     const result = await cloudinary.uploader.upload(file.path, {
-    //       folder: `vinted/offers/${newOffer.id}`,
-    //     });
-    //     // console.log("RESULT:", result);
-    //     results[fileKey] = {
-    //       success: true,
-    //       result: result,
-    //     };
-    //     // console.log("RESULTS:", results);
-
-    //     if (Object.keys(results).length === fileKeys.length) {
-    //       newOffer.product_image = results;
-
-    //       // Save
-    //       await newOffer.save();
-    //       console.log("NEW OFFER", newOffer);
-    //       res.status(200).json(newOffer);
-    //     }
-    //   } catch (error) {
-    //     res.status(400).json({ message: error.message });
-    //   }
-    // }
-
     let results = {};
-    const arrFiles = [];
+    let arrFiles = [];
     const reqFiles = req.files.file; //  Si plusieurs fichier : [{..},{..},{..}] || Si 1 fichier: {...}
-    console.log("arrFiles:", arrFiles);
+    //console.log("arrFiles:", arrFiles);
 
     // FORMATAGE AVANT TRAITEMENT CLOUDINARY
     if (reqFiles.length === 0) {
       res.status(400).json({ message: "No file uploaded!" });
     } else if (reqFiles.length !== undefined) {
       // Si c'est un tableau
-      console.log("c'est un tableau");
-      const arrFiles = reqFiles;
-      console.log("arrFiles:", arrFiles); //ok
+      arrFiles = reqFiles;
     } else {
       //Si c'est 1 fichier
       //En créer un tableau : push dans arrFiles
-      console.log("C'est 1 fichier");
       arrFiles.push(reqFiles);
-      console.log("arrFiles", arrFiles);
     }
 
     // SI PLUSIEURS FICHIERS À ENVOYER SUR CLOUDINARY
@@ -104,21 +62,21 @@ router.post("/offer/publish", isAuthenticated, async (req, res) => {
         const result = await cloudinary.uploader.upload(file.path, {
           folder: `vinted/offers/${newOffer.id}`,
         });
-        console.log("RESULT:", result);
+        //console.log("RESULT:", result);
 
         results[`file${index}`] = {
           // { file2:{...}, file0:{...}, file1{...}}
           success: true,
           result: result,
         };
-        console.log("RESULTS:", results);
+        //console.log("RESULTS:", results);
 
         if (Object.keys(results).length === arrFiles.length) {
           newOffer.product_image = results;
 
           // Save
           await newOffer.save();
-          console.log("NEW OFFER", newOffer);
+          //console.log("NEW OFFER", newOffer);
           res.status(200).json(newOffer);
         }
       } catch (error) {
@@ -131,7 +89,6 @@ router.post("/offer/publish", isAuthenticated, async (req, res) => {
 });
 
 router.get("/offers", async (req, res) => {
-  console.log(req.query);
   try {
     const title = req.query.title; // 'pantalon'
     const priceMin = req.query.priceMin;
